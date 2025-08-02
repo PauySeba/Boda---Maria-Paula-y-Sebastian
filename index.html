@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boda - María Paula & Sebastián</title>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset y estilos base */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Marcellus', serif;
+            background-color: #f8f5f0;
+            color: #5a5a5a;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Efecto de sobre con lacrado */
+        #envelope-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f0e8db;
+            z-index: 1000;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to top right, transparent 49.8%, #e8dfd1 50%),
+                        linear-gradient(to top left, transparent 49.8%, #e8dfd1 50%);
+            background-size: 50% 100%;
+            background-repeat: no-repeat;
+            background-position: left, right;
+            z-index: 1;
+            transform-origin: top;
+            transition: transform 1s ease;
+        }
+        
+        .wax-seal {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            width: 85px;
+            height: 85px;
+            background-color: #e0a08d;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .wax-seal:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4) 0%, transparent 70%);
+        }
+        
+        .open-text {
+            position: relative;
+            z-index: 3;
+            margin-top: 100px;
+            color: #7a6a5f;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        /* Animación */
+        #envelope-overlay.open #envelope-flap {
+            transform: rotateX(180deg);
+        }
+        
+        #envelope-overlay.open .wax-seal {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-100px);
+        }
+        
+        #envelope-overlay.open {
+            animation: fadeOut 1s ease forwards 1s;
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        
+        /* Invitación principal */
+        #invitation {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        }
+        
+        /* Header con slider */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* Relación 16:9 para el slider */
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        /* Nombres */
+        .names {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 3.2rem);
+            color: #5a5a5a;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        
+        .separator {
+            width: 100px;
+            height: 1px;
+            background-color: #c4a883;
+            margin: 20px auto;
+        }
+        
+        /* Cuenta regresiva */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 25px 0;
+            margin: 40px 0;
+            background-color: #faf8f5;
+        }
+        
+        .countdown-item {
+            text-align: center;
+            min-width: 70px;
+        }
+        
+        .countdown-number {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: bold;
+            color: #5a5a5a;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .countdown-label {
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Eventos centrados */
+        .events-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 50px 0;
+        }
+        
+        .event {
+            flex: 0 1 400px;
+            padding: 30px;
+            background-color: #faf8f5;
+            text-align: center;
+        }
+        
+        .event-title {
+            font-family: 'Playfair Display', serif;
+            color: #5a5a5a;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0d5c3;
+        }
+        
+        .event-details {
+            line-height: 1.8;
+            color: #666;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        .event-date {
+            font-weight: bold;
+            color: #5a5a5a;
+            margin: 10px 0;
+            display: block;
+        }
+        
+        .map-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: transparent;
+            color: #c4a883;
+            border: 1px solid #c4a883;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            border-radius: 3px;
+        }
+        
+        .map-btn:hover {
+            background-color: #c4a883;
+            color: white;
+        }
+        
+        /* Datos bancarios */
+        .bank-info {
+            background-color: #faf8f5;
+            padding: 30px;
+            text-align: center;
+            margin: 50px 0;
+        }
+        
+        .bank-info h3 {
+            font-family: 'Playfair Display', serif;
+            color: #5a5a5a;
+            margin-bottom: 15px;
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+        }
+        
+        .bank-details {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+            border: 1px solid #e0d5c3;
+            max-width: 500px;
+            width: 100%;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        /* RSVP */
+        .rsvp-btn {
+            display: block;
+            width: 250px;
+            max-width: 100%;
+            margin: 50px auto;
+            padding: 15px;
+            background-color: #c4a883;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 1em;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .rsvp-btn:hover {
+            background-color: #b39876;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 30px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            border-top: 1px solid #eee;
+            margin-top: 50px;
+        }
+        
+        /* Controles del slider */
+        .slider-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+        
+        .slider-control {
+            background: rgba(255,255,255,0.5);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+        }
+        
+        /* Indicadores del slider */
+        .slider-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .slider-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .slider-indicator.active {
+            background: white;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slider-container {
+                padding-bottom: 75%; /* Relación más cuadrada para móviles */
+            }
+            
+            .event {
+                flex: 0 1 100%;
+            }
+            
+            .countdown {
+                gap: 10px;
+            }
+            
+            .countdown-item {
+                min-width: 60px;
+            }
+            
+            .wax-seal {
+                width: 85px;
+                height: 85px;
+                font-size: 14px;
+            }
+            
+            .open-text {
+                margin-top: 80px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .slider-container {
+                padding-bottom: 100%; /* Relación 1:1 para móviles pequeños */
+            }
+            
+            .names {
+                margin: 20px 0;
+            }
+            
+            .separator {
+                margin: 10px auto;
+            }
+            
+            .countdown {
+                padding: 15px 0;
+            }
+            
+            .event, .bank-info {
+                padding: 20px;
+            }
+            
+            .wax-seal {
+                width: 85px;
+                height: 85px;
+                font-size: 14px;
+            }
+            
+            .open-text {
+                font-size: 16px;
+                margin-top: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efecto de sobre con lacrado -->
+    <div id="envelope-overlay">
+        <div id="envelope-flap"></div>
+        <div class="wax-seal">MP & SM</div>
+        <div class="open-text">Toca para abrir la invitación</div>
+    </div>
+    
+    <!-- Invitación principal -->
+    <div id="invitation">
+        <!-- Encabezado con slider -->
+        <div class="slider-container">
+            <div class="slider">
+                <!-- Slides con las fotos -->
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto1.jpeg" alt="Foto boda 1">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto2.jpeg" alt="Foto boda 2">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto3.jpg" alt="Foto boda 3">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto4.jpg" alt="Foto boda 4">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto5.jpg" alt="Foto boda 5">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto6.jpeg" alt="Foto boda 6">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto7.jpg" alt="Foto boda 7">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto8.jpg" alt="Foto boda 8">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto9.jpg" alt="Foto boda 9">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto10.jpg" alt="Foto boda 10">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto11.jpeg" alt="Foto boda 11">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto1.jpeg" alt="Foto boda 1">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto2.jpeg" alt="Foto boda 2">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto3.jpg" alt="Foto boda 3">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto4.jpg" alt="Foto boda 4">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto5.jpg" alt="Foto boda 5">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto6.jpeg" alt="Foto boda 6">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto7.jpg" alt="Foto boda 7">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto8.jpg" alt="Foto boda 8">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto9.jpg" alt="Foto boda 9">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto10.jpg" alt="Foto boda 10">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto11.jpeg" alt="Foto boda 11">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto1.jpeg" alt="Foto boda 1">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto2.jpeg" alt="Foto boda 2">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto3.jpg" alt="Foto boda 3">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto4.jpg" alt="Foto boda 4">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto5.jpg" alt="Foto boda 5">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto6.jpeg" alt="Foto boda 6">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto7.jpg" alt="Foto boda 7">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto8.jpg" alt="Foto boda 8">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto9.jpg" alt="Foto boda 9">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto10.jpg" alt="Foto boda 10">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto11.jpeg" alt="Foto boda 11">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto1.jpeg" alt="Foto boda 1">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto2.jpeg" alt="Foto boda 2">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto3.jpg" alt="Foto boda 3">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto4.jpg" alt="Foto boda 4">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto5.jpg" alt="Foto boda 5">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto6.jpeg" alt="Foto boda 6">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto7.jpg" alt="Foto boda 7">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto8.jpg" alt="Foto boda 8">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto9.jpg" alt="Foto boda 9">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto10.jpg" alt="Foto boda 10">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto11.jpeg" alt="Foto boda 11">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto1.jpeg" alt="Foto boda 1">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto2.jpeg" alt="Foto boda 2">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto3.jpg" alt="Foto boda 3">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto4.jpg" alt="Foto boda 4">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto5.jpg" alt="Foto boda 5">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto6.jpeg" alt="Foto boda 6">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto7.jpg" alt="Foto boda 7">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto8.jpg" alt="Foto boda 8">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\foto9.jpg" alt="Foto boda 9">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto10.jpg" alt="Foto boda 10">
+                </div>
+                <div class="slide">
+                    <img src="C:\Users\smontiel\Desktop\Invitacion\imagenes\Foto11.jpeg" alt="Foto boda 11">
+                </div>
+            </div>
+            
+            <!-- Controles del slider -->
+            <div class="slider-controls">
+                <button class="slider-control prev">❮</button>
+                <button class="slider-control next">❯</button>
+            </div>
+            
+            <!-- Indicadores del slider -->
+            <div class="slider-indicators"></div>
+        </div>
+        
+        <!-- Nombres -->
+        <div class="names">
+            <h1>María Paula</h1>
+            <div class="separator"></div>
+            <h1>&</h1>
+            <div class="separator"></div>
+            <h1>Sebastián</h1>
+        </div>
+        
+        <!-- Cuenta regresiva -->
+        <div class="countdown">
+            <div class="countdown-item">
+                <div class="countdown-number" id="days">00</div>
+                <div class="countdown-label">Días</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="hours">00</div>
+                <div class="countdown-label">Horas</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="minutes">00</div>
+                <div class="countdown-label">Minutos</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="seconds">00</div>
+                <div class="countdown-label">Segundos</div>
+            </div>
+        </div>
+        
+        <!-- Eventos centrados -->
+        <div class="events-container">
+            <div class="event">
+                <div class="event-title">Registro Civil</div>
+                <div class="event-details">
+                    <span class="event-date">19 de Septiembre, 2025 - 11:15 hs</span>
+                    Registro Civil de Hurlingham<br>
+                    Ginebra 1568, Hurlingham<br>
+                    Dress code: Casual<br>
+                    <a href="https://maps.app.goo.gl/MhsjcryJqLpBfPr29" class="map-btn" target="_blank">Ver en Google Maps</a>
+                </div>
+            </div>
+            
+            <div class="event">
+                <div class="event-title">Ceremonia</div>
+                <div class="event-details">
+                    <span class="event-date">20 de Septiembre, 2025 - 18:00 hs (Puntual)</span>
+                    Salón Cool Jazz<br>
+                    San Cayetano 1490, La Reja<br>
+                    Dress code: Elegante Sport<br>
+                    <a href="https://maps.app.goo.gl/oRzQ388H4ENZZiXH6" class="map-btn" target="_blank">Ver en Google Maps</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Datos bancarios -->
+        <div class="bank-info">
+            <h3>Si deseas hacernos un regalo</h3>
+            <p>Te compartimos nuestros datos bancarios:</p>
+            <div class="bank-details">
+                CVU: 0000003100086307988647<br>
+                Alias: BODA.PAU.SEBAS<br>
+            </div>
+        </div>
+        
+        <!-- Botón RSVP -->
+        <a href="https://forms.gle/vRicBNxhkhpWWtku6" class="rsvp-btn" target="_blank">Confirmar Asistencia</a>
+        
+        <footer>
+            ¡Esperamos compartir este día especial con vos!
+        </footer>
+    </div>
+    
+    <!-- Audio -->
+    <audio id="wedding-music" loop>
+        <source src="C:\Users\smontiel\Desktop\Invitacion\Musica\beautiful-things-piano-222056.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+    
+    <script>
+        // Animación del sobre y música
+        document.getElementById('envelope-overlay').addEventListener('click', function() {
+            this.classList.add('open');
+            
+            setTimeout(() => {
+                this.style.display = 'none';
+                document.getElementById('invitation').style.display = 'block';
+                // Iniciar música automáticamente
+                document.getElementById('wedding-music').play().catch(e => console.log("Autoplay bloqueado: ", e));
+                // Iniciar slider
+                initSlider();
+                // Iniciar cuenta regresiva
+                startCountdown();
+            }, 1000);
+        });
+        
+        // Slider de fotos
+        function initSlider() {
+            const slider = document.querySelector('.slider');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev');
+            const nextBtn = document.querySelector('.next');
+            const indicatorsContainer = document.querySelector('.slider-indicators');
+            let currentIndex = 0;
+            let slideInterval;
+            
+            // Crear indicadores
+            slides.forEach((_, index) => {
+                const indicator = document.createElement('div');
+                indicator.classList.add('slider-indicator');
+                if (index === 0) indicator.classList.add('active');
+                indicator.addEventListener('click', () => goToSlide(index));
+                indicatorsContainer.appendChild(indicator);
+            });
+            
+            // Función para actualizar el slider
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // Actualizar indicadores
+                document.querySelectorAll('.slider-indicator').forEach((indicator, index) => {
+                    if (index === currentIndex) {
+                        indicator.classList.add('active');
+                    } else {
+                        indicator.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Ir a slide específico
+            function goToSlide(index) {
+                currentIndex = index;
+                if (currentIndex >= slides.length) currentIndex = 0;
+                if (currentIndex < 0) currentIndex = slides.length - 1;
+                updateSlider();
+                resetInterval();
+            }
+            
+            // Siguiente slide
+            function nextSlide() {
+                goToSlide(currentIndex + 1);
+            }
+            
+            // Slide anterior
+            function prevSlide() {
+                goToSlide(currentIndex - 1);
+            }
+            
+            // Reiniciar intervalo automático
+            function resetInterval() {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, 3000);
+            }
+            
+            // Event listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            
+            // Iniciar intervalo automático
+            resetInterval();
+            
+            // Pausar al pasar el mouse
+            slider.parentElement.addEventListener('mouseenter', () => {
+                clearInterval(slideInterval);
+            });
+            
+            slider.parentElement.addEventListener('mouseleave', resetInterval);
+        }
+        
+        // Cuenta regresiva
+        function startCountdown() {
+            const weddingDate = new Date('September 20, 2025 18:00:00').getTime();
+            
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = weddingDate - now;
+                
+                document.getElementById('days').textContent = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+                document.getElementById('hours').textContent = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                document.getElementById('seconds').textContent = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+        
+        // RSVP
+        document.getElementById('open-rsvp').addEventListener('click', function() {
+            alert("Formulario de RSVP se abrirá aquí");
+            // Implementar lógica del formulario
+        });
+        
+        // Pausar música al cambiar de pestaña
+        document.addEventListener('visibilitychange', function() {
+            const music = document.getElementById('wedding-music');
+            if (document.hidden) {
+                music.pause();
+            } else {
+                if (document.getElementById('invitation').style.display === 'block') {
+                    music.play().catch(e => console.log("Autoplay: ", e));
+                }
+            }
+        });
+    </script>
+</body>
+</html>
